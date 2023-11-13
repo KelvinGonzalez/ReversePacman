@@ -47,15 +47,45 @@ for (var i = 0; i &lt; instance_number(obj_big_dot); i++) {
     var big_dot = instance_find(obj_big_dot, i);
     global.grid[# to_grid(big_dot.x), to_grid(big_dot.y)] = 3;
 }
+global.grid[# to_grid(ghost_spawn.x), to_grid(ghost_spawn.y)] = 4;
 
 ghost_count = 0;
 ghost_limit = 4;
-ghost_spawn_time = 90;
-alarm[0] = ghost_spawn_time;
+ghost_spawn_time = 60;
+//alarm[0] = ghost_spawn_time;
 
 revive_queue = ds_queue_create();
 
+instance_deactivate_all(self);
+start_level = false;
+
 //path = shortest_path(to_grid(start.x), to_grid(start.y), to_grid(finish.x), to_grid(finish.y));
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event eventtype="2" enumb="2">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>start_level = true;
+alarm[0] = ghost_spawn_time;
+obj_pacman.alarm[0] = 1;
+//obj_ghost.alarm[0] = 1;
 </string>
           </argument>
         </arguments>
@@ -83,6 +113,7 @@ var ghost = ghosts[ghost_id];
 instance_activate_object(ghost);
 ghost.x = ghost_spawn.x;
 ghost.y = ghost_spawn.y;
+ghost.afraid = false;
 
 if (!ds_queue_empty(revive_queue)) alarm[1] = ghost_spawn_time;
 </string>
@@ -111,7 +142,12 @@ if (!ds_queue_empty(revive_queue)) alarm[1] = ghost_spawn_time;
 ghosts[ghost_count].ghost_id = ghost_count;
 ghost_count++;
 
-if (ghost_count &lt; ghost_limit-1) alarm[0] = ghost_spawn_time;
+var spawn_ghost_count;
+if (global.level &gt;= 5) spawn_ghost_count = 2;
+else if (global.level &gt;= 3) spawn_ghost_count = 3;
+else spawn_ghost_count = ghost_limit
+
+if (ghost_count &lt; spawn_ghost_count) alarm[0] = ghost_spawn_time;
 </string>
           </argument>
         </arguments>
@@ -134,14 +170,13 @@ if (ghost_count &lt; ghost_limit-1) alarm[0] = ghost_spawn_time;
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>/*swap_x = keyboard_check_pressed(vk_right) - keyboard_check_pressed(vk_left);
-swap_y = keyboard_check_pressed(vk_up) - keyboard_check_pressed(vk_down);
-if (abs(swap_x) || abs(swap_y)) {
-    var blinky = get_blinky();
-    var swap_ghost = get_swap_ghost(blinky.x, blinky.y, swap_x, swap_y);
-    blinky.ghost_id = swap_ghost.ghost_id;
-    swap_ghost.ghost_id = 0;
-}*/
+            <string>if (!start_level) {
+    if (keyboard_check_pressed(vk_space)) {
+        instance_activate_all();
+        alarm[2] = 1;
+    }
+}
+else if (instance_number(obj_dot) == 0) room_goto(loss_screen);
 </string>
           </argument>
         </arguments>
@@ -164,7 +199,7 @@ if (abs(swap_x) || abs(swap_y)) {
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>draw_set_color(c_red);
+            <string>/*draw_set_color(c_red);
 for (var j = 0; j &lt; ghost_count; j++) {
     for (i = 0; i &lt; ds_list_size(ghosts[j].path)-2; i += 2) {
         offset = global.cell_size/2;
@@ -183,12 +218,54 @@ for (i = 0; i &lt; ds_list_size(obj_pacman.path)-2; i += 2) {
     next_x = from_grid(obj_pacman.path[| i+2])+offset;
     next_y = from_grid(obj_pacman.path[| i+3])+offset;
     draw_line(cur_x, cur_y, next_x, next_y);
-}
+}*/
 /*for (var xx = 0; xx &lt; width; xx++) {
     for (var yy = 0; yy &lt; height; yy++) {
         draw_text(from_grid(xx, cell_size), from_grid(yy, cell_size), string(grid[# xx, yy]));
     }
 }*/
+draw_set_color(c_white);
+var print_string;
+print_string[0] = "
+Level 1##
+Catch Pacman to win!
+";
+print_string[1] = "
+Level 2##
+Big dots have now been added to#
+the game. Watch out for Pacman!
+";
+print_string[2] = "
+Level 3##
+Ghosts move much slower than before!#
+Make sure to strategize in order to#
+make up for your speed debuff.
+";
+print_string[3] = "
+Level 4##
+You've lost a Ghost (Oh no!). Can you#
+catch Pacman despite this fact?
+";
+print_string[4] = "
+Level 5##
+Many many more big dots have suddenly#
+appeared in the arena! Pacman will surely#
+be much more of a threat now!
+";
+print_string[5] = "
+Level 6##
+This is the last level. It's just you#
+and Pinky, and you're moving the slowest#
+you have so far!
+";
+print_string[6] = "
+Level 7??##
+Nop, just the end. Congrats! Some would say#
+that *you're* the *true* Pacman!
+";
+if (!start_level) {
+    draw_text(room_width/2, room_height/2, print_string[global.level]);
+}
 draw_set_color(c_black);
 </string>
           </argument>
@@ -212,7 +289,7 @@ draw_set_color(c_black);
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>room_restart();
+            <string>//room_restart();
 </string>
           </argument>
         </arguments>

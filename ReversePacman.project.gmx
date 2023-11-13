@@ -31,7 +31,11 @@
     <script>scripts\get_swap_ghost.gml</script>
     <script>scripts\find_nearest_big_dot.gml</script>
     <script>scripts\avoid_frenzy.gml</script>
+    <script>scripts\get_dir.gml</script>
   </scripts>
+  <fonts name="fonts">
+    <font>fonts\fnt_consolas</font>
+  </fonts>
   <objects name="objects">
     <object>objects\obj_wall</object>
     <object>objects\start</object>
@@ -43,9 +47,20 @@
     <object>objects\obj_dot</object>
     <object>objects\ghost_spawn_barrier</object>
     <object>objects\obj_big_dot</object>
+    <object>objects\start_control</object>
+    <object>objects\end_control</object>
+    <object>objects\loss_control</object>
   </objects>
   <rooms name="rooms">
-    <room>rooms\main</room>
+    <room>rooms\start_screen</room>
+    <room>rooms\main_0</room>
+    <room>rooms\main_1</room>
+    <room>rooms\main_2</room>
+    <room>rooms\main_3</room>
+    <room>rooms\main_4</room>
+    <room>rooms\main_5</room>
+    <room>rooms\end_screen</room>
+    <room>rooms\loss_screen</room>
   </rooms>
   <help>
     <rtf>help.rtf</rtf>

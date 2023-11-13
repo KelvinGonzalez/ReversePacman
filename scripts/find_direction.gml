@@ -15,10 +15,10 @@ for (var dir = 0; dir < 4; dir++) {
     if (global.grid[# next_x, next_y] == 1) continue;
     ds_list_add(valid_directions, dir);
     var in_ghost_path = false;
-    for (var i = 0; i < ds_list_size(ghost_paths); i++) {
+    for (var i = 0; i < control.ghost_count; i++) {
         var ghost_path = ghost_paths[| i];
         var n = ds_list_size(ghost_path);
-        if (n > distance_threshold) continue;
+        if (n > distance_threshold/* || control.ghosts[i].afraid*/) continue;
         if (point_in_path(next_x, next_y, ghost_paths[| i])) {
         //if (next_x == ghost_path[| n-1-3] && next_y == ghost_path[| n-1-2]) {
             in_ghost_path = true;

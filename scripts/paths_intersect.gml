@@ -4,9 +4,9 @@ var target_path = argument0;
 var ghost_paths = argument1;
 var distance_threshold = argument2;
 
-for (var j = 0; j < ds_list_size(ghost_paths); j++) {
+for (var j = 0; j < control.ghost_count; j++) {
     var ghost_path = ghost_paths[| j];
-    if (ds_list_size(ghost_path) > distance_threshold) {
+    if (ds_list_size(ghost_path) > distance_threshold/* || control.ghosts[j].afraid*/) {
         continue;
     }
     

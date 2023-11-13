@@ -34,10 +34,12 @@ targeting = false;
 dir_x = 0;
 dir_y = 0;
 point_threshold = 2;
-global.ghost_speed_modifier = 0.9;
-ghost_speed_modifier = global.ghost_speed_modifier;
+
+ghost_speed_modifier = 0.9;
 
 barrier_crossed = false;
+afraid = false;
+eaten = false;
 </string>
           </argument>
         </arguments>
@@ -60,9 +62,9 @@ barrier_crossed = false;
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>
+            <string>get_path();
 
-//alarm[0] = 1//global.move_speed / global.blocks_per_second;
+alarm[0] = 2//global.move_speed / global.blocks_per_second;
 </string>
           </argument>
         </arguments>
@@ -85,15 +87,51 @@ barrier_crossed = false;
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>if (obj_pacman.frenzy) {
-    ghost_speed_modifier = 0.5;
+            <string>var level_speed_modifier;
+if (global.level == 5) level_speed_modifier = 0.4;
+else if (global.level == 2) level_speed_modifier = 0.7;
+else level_speed_modifier = 1;
+
+if (eaten) {
+    ghost_speed_modifier = 3;
+}
+else if (afraid) {
+    ghost_speed_modifier = 0.5 * level_speed_modifier;
 }
 else {
-    ghost_speed_modifier = 0.9;
+    ghost_speed_modifier = 0.9 * level_speed_modifier;
 }
 
-image_index = ghost_id;
-if (ghost_id == 0) {
+if (eaten) image_index = 5;
+else if (afraid) image_index = 4;
+else image_index = ghost_id;
+
+if (eaten) {
+    if (!targeting) {
+        start_path = shortest_path(to_grid(x), to_grid(y), to_grid(ghost_spawn.x), to_grid(ghost_spawn.y));
+        n = ds_list_size(start_path);
+        if (n &gt; 2) {
+            target_x = from_grid(start_path[| n-1-3]);
+            target_y = from_grid(start_path[| n-1-2]);
+            dir_x = sign(start_path[| n-1-3]-start_path[| n-1-1]);
+            dir_y = sign(start_path[| n-1-2]-start_path[| n-1-0]);
+            targeting = true;
+        }
+    }
+    else if (abs(target_x - x) &lt;= point_threshold &amp;&amp; abs(target_y - y) &lt;= point_threshold) {
+        targeting = false;
+    }
+    else {
+        x += dir_x * global.move_speed * ghost_speed_modifier;
+        y += dir_y * global.move_speed * ghost_speed_modifier;
+    }
+    if (abs(ghost_spawn.x - x) &lt;= point_threshold &amp;&amp; abs(ghost_spawn.y - y) &lt;= point_threshold) {
+        eaten = false;
+        afraid = false;
+        barrier_crossed = false;
+    }
+}
+else if (ghost_id == 0) {
     target_dir_x = keyboard_check(ord('D')) - keyboard_check(ord('A'));
     target_dir_y = keyboard_check(ord('S')) - keyboard_check(ord('W'));
     
@@ -119,8 +157,8 @@ if (ghost_id == 0) {
         dir_x = 0;
         spd_x = 0;
     }
-    if (place_meeting(x, y+spd_y, obj_wall)) {
-        while (!place_meeting(x, y+dir_y, obj_wall)) {
+    if (place_meeting(x, y+spd_y, obj_wall) || place_meeting(x, y+spd_y, ghost_spawn)) {
+        while (!place_meeting(x, y+dir_y, obj_wall) &amp;&amp; !place_meeting(x, y+spd_y, ghost_spawn)) {
             y += dir_y;
         }
         dir_y = 0;
@@ -137,12 +175,11 @@ if (ghost_id == 0) {
 }
 else {
     if (!targeting) {
-        if (obj_pacman.frenzy) {
+        if (afraid) {
             avoid_frenzy(to_grid(x), to_grid(y), obj_pacman.frenzy_path);
             targeting = true;
         }
         else {
-            get_path();
             n = ds_list_size(path);
             if (n &gt; 2) {
                 target_x = from_grid(path[| n-1-3]);
@@ -163,6 +200,48 @@ else {
 }
 
 if (y &lt; ghost_spawn_barrier.y - global.cell_size) barrier_crossed = true;
+
+if (x &lt; 0 || x &gt;= room_width || y &lt; 0 || y &gt;= room_height) {
+    x = ghost_spawn.x;
+    y = ghost_spawn.y;
+    targeting = false;
+}
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event eventtype="4" ename="obj_pacman">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>// handle death
+if (!afraid) {
+    global.level++;
+    room_goto(global.levels[global.level])
+}
+else if (!eaten){
+    eaten = true;
+    targeting = false;
+    /*ds_queue_enqueue(control.revive_queue, other.ghost_id);
+    if (ds_queue_size(control.revive_queue) == 1) {
+        control.alarm[1] = control.ghost_spawn_time;
+    }
+    instance_deactivate_object(other);*/
+}
 </string>
           </argument>
         </arguments>
@@ -186,7 +265,7 @@ if (y &lt; ghost_spawn_barrier.y - global.cell_size) barrier_crossed = true;
           <argument>
             <kind>1</kind>
             <string>draw_self();
-//draw_text(x, y, string(ghost_id))
+//draw_text(x, y, string(afraid))
 </string>
           </argument>
         </arguments>

@@ -29,7 +29,7 @@ while (!found && !ds_queue_empty(queue)) {
         var next_x = cur_x + ((dir == 2) - (dir == 3));
         var next_y = cur_y + ((dir == 1) - (dir == 0));
 
-        if (next_x >= 0 && next_x < width && next_y >= 0 && next_y < height && parent_x[# next_x, next_y] == undefined && grid[# next_x, next_y] != 1 && grid[# next_x, next_y] != 3) {
+        if (next_x >= 0 && next_x < width && next_y >= 0 && next_y < height && parent_x[# next_x, next_y] == undefined && grid[# next_x, next_y] != 1/* && grid[# next_x, next_y] != 3*/) {
             ds_queue_enqueue(queue, next_x);
             ds_queue_enqueue(queue, next_y);
             parent_x[# next_x, next_y] = cur_x;

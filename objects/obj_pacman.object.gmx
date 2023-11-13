@@ -36,7 +36,7 @@ dir_x = 0;
 dir_y = 0;
 
 update_path_time = global.move_speed / global.blocks_per_second;
-alarm[0] = 1;
+//alarm[0] = 1;
 path = ds_list_create();
 big_dot_path = ds_list_create();
 point_threshold = 1;
@@ -46,13 +46,45 @@ for (var i = 0; i &lt; control.ghost_limit; i++) {
     ghost_paths[| i] = ds_list_create();
 }
 
-distance_threshold = 5 * 2;
+distance_threshold = 6 * 2;
 
 path_intersected = false;
 
 frenzy = false;
 frenzy_duration = 5 * 60;
 frenzy_path = 0;
+danger = false;
+
+animation_frame = 0;
+frame_count = 2;
+animation_duration = 15;
+alarm[2] = animation_duration;
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event eventtype="2" enumb="2">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>animation_frame++;
+if (animation_frame == frame_count) animation_frame = 0;
+
+alarm[2] = animation_duration;
 </string>
           </argument>
         </arguments>
@@ -76,6 +108,7 @@ frenzy_path = 0;
           <argument>
             <kind>1</kind>
             <string>frenzy = false;
+with(obj_ghost) afraid = false;
 </string>
           </argument>
         </arguments>
@@ -109,7 +142,7 @@ for (var i = 0; i &lt; control.ghost_count; i++) {
     ghost_paths[| i] = shortest_path(to_grid(x), to_grid(y), to_grid(ghost.x), to_grid(ghost.y));
 }
 
-alarm[0] = 1;
+alarm[0] = 2;
 </string>
           </argument>
         </arguments>
@@ -137,15 +170,29 @@ alarm[0] = 1;
     //ds_list_destroy(path);
     //find_nearest_dot(to_grid(x), to_grid(y));
     if (frenzy) {
-        var f_path = ghost_paths[| frenzy_path];
-        var n = ds_list_size(f_path);
-        if (n &gt; 2) {
-            target_x = from_grid(f_path[| n-1-3]);
-            target_y = from_grid(f_path[| n-1-2]);
-            dir_x = sign(f_path[| n-1-3]-f_path[| n-1-1]);
-            dir_y = sign(f_path[| n-1-2]-f_path[| n-1-0]);
+        /*if (paths_intersect(path, ghost_paths, distance_threshold)) {
+            find_direction(to_grid(x), to_grid(y), ghost_paths, distance_threshold);
             targeting = true;
+            danger = true;
         }
+        else {*/
+            var f_path;
+            if (ds_list_size(ghost_paths[| frenzy_path]) &gt; 0 &amp;&amp; ds_list_size(ghost_paths[| frenzy_path]) &lt; ds_list_size(path) * 0.5) {
+                f_path = ghost_paths[| frenzy_path];
+            }
+            else {
+                f_path = path;
+            }
+            var n = ds_list_size(f_path);
+            if (n &gt; 2) {
+                target_x = from_grid(f_path[| n-1-3]);
+                target_y = from_grid(f_path[| n-1-2]);
+                dir_x = sign(f_path[| n-1-3]-f_path[| n-1-1]);
+                dir_y = sign(f_path[| n-1-2]-f_path[| n-1-0]);
+                targeting = true;
+            }
+            danger = false;
+        //}
     }
     else if (ghosts_nearby_count(ghost_paths, 8 * 2) &gt;= 1
         &amp;&amp; ds_list_size(big_dot_path) &gt; 2
@@ -195,6 +242,7 @@ big_dot = instance_place(x, y, obj_big_dot);
 if (big_dot != noone) {
     global.grid[# to_grid(x), to_grid(y)] = 0;
     frenzy = true;
+    obj_ghost.afraid = true;
     alarm[1] = frenzy_duration;
     with (big_dot) instance_destroy();
 }
@@ -202,48 +250,18 @@ if (big_dot != noone) {
 if (frenzy) {
     min_size = ds_list_size(ghost_paths[| 0]);
     frenzy_path = 0;
-    /*for (var i = 1; i &lt; ds_list_size(ghost_paths); i++) {
-        if (ds_list_size(ghost_paths[| i] &gt;= 4)
-            &amp;&amp; ds_list_size(ghost_paths[| i] &lt; min_size)) {
+    for (var i = 1; i &lt; ds_list_size(ghost_paths); i++) {
+        if (instance_find(obj_ghost, i).afraid
+            &amp;&amp; ds_list_size(ghost_paths[| i]) &gt; 0
+            &amp;&amp; ds_list_size(ghost_paths[| i]) &lt; min_size) {
             
             min_size = ds_list_size(ghost_paths[| i]);
             frenzy_path = i;
         }
-    }*/
-}
-</string>
-          </argument>
-        </arguments>
-      </action>
-    </event>
-    <event eventtype="4" ename="obj_ghost">
-      <action>
-        <libid>1</libid>
-        <id>603</id>
-        <kind>7</kind>
-        <userelative>0</userelative>
-        <isquestion>0</isquestion>
-        <useapplyto>-1</useapplyto>
-        <exetype>2</exetype>
-        <functionname></functionname>
-        <codestring></codestring>
-        <whoName>self</whoName>
-        <relative>0</relative>
-        <isnot>0</isnot>
-        <arguments>
-          <argument>
-            <kind>1</kind>
-            <string>// handle death
-if (!frenzy) {
-    room_restart();
-}
-else {
-    ds_queue_enqueue(control.revive_queue, other.ghost_id);
-    if (ds_queue_size(control.revive_queue) == 1) {
-        control.alarm[1] = control.ghost_spawn_time;
     }
-    instance_deactivate_object(other);
 }
+
+image_index = get_dir(dir_x, dir_y) * frame_count + animation_frame;
 </string>
           </argument>
         </arguments>
@@ -267,7 +285,7 @@ else {
           <argument>
             <kind>1</kind>
             <string>draw_self();
-if (frenzy) draw_text(x, y, frenzy_path);
+//if (frenzy) draw_text(x, y, danger);
 </string>
           </argument>
         </arguments>
