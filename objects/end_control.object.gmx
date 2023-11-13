@@ -52,9 +52,10 @@
             <kind>1</kind>
             <string>draw_set_color(c_white);
 draw_text(room_width/2, room_height/2, "
-With that level done, the game is finished##
-You beat the game, Hooray!##
-Press Space to go back to the start...
+Level 7??##
+Nop, just the end. Congrats! Some would say#
+that *you're* the *true* Pacman!##
+Press Space to go back to the start.
 ");
 draw_set_color(c_black);
 </string>

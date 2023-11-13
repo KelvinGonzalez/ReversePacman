@@ -97,16 +97,16 @@ The goal of this game is to overcome the#
 various levels by defeating Pacman as a#
 ghost. You take on the role of Blinky#
 (Blue Ghost). Levels will get harder as#
-you go so think of various plans to#
+you go, so think of various plans to#
 tackle each situation.##
-Press Space to continue
+Press Space to continue.
     ");
 }
 else if (cur_page == 1) {
     draw_text(room_width/2, room_height/2, "
 Controls##
 Use WASD to move your ghost around!##
-Yea that's about it..##
+Yea, that's about it..##
 Press Space to start!
     ");
 }

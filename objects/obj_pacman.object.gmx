@@ -194,7 +194,8 @@ alarm[0] = 2;
             danger = false;
         //}
     }
-    else if (ghosts_nearby_count(ghost_paths, 8 * 2) &gt;= 1
+    else if (instance_number(obj_big_dot) &gt; 0
+        &amp;&amp; ghosts_nearby_count(ghost_paths, 8 * 2) &gt;= 1
         &amp;&amp; ds_list_size(big_dot_path) &gt; 2
         &amp;&amp; ds_list_size(big_dot_path) &lt;= 5 * 2
         &amp;&amp; !paths_intersect(big_dot_path, ghost_paths, 2 * 2)) {
