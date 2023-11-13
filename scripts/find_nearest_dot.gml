@@ -1,25 +1,14 @@
-/// shortest_path(cur_x, cur_y, target_x, target_y)
-var grid, cur_x, cur_y, target_x, target_y, queue, parent_x, parent_y, width, height;
-grid = global.grid;
+/// find_nearest_dot(cur_x, cur_y)
+
+var cur_x, cur_y, width, height, queue, parent_x, parent_y, grid;
 cur_x = argument0;
 cur_y = argument1;
-target_x = argument2;
-target_y = argument3;
+grid = global.grid;
 width = ds_grid_width(grid);
 height = ds_grid_height(grid);
 queue = ds_queue_create();
 parent_x = ds_grid_create_undefined(width, height);
 parent_y = ds_grid_create_undefined(width, height);
-
-var dir_x = sign(to_grid(room_width/2) - target_x);
-var dir_y = sign(to_grid(room_height/2) - target_y);
-while (global.grid[# target_x, target_y] == 1) {
-    target_x += dir_x;
-    if (global.grid[# target_x, target_y] != 1) {
-        break;
-    }
-    target_y += dir_y;
-}
 
 ds_queue_enqueue(queue, cur_x);
 ds_queue_enqueue(queue, cur_y);
@@ -28,19 +17,19 @@ parent_y[# cur_x, cur_y] = -1;
 
 var found = false;
 while (!found && !ds_queue_empty(queue)) {
-    var cur_x = ds_queue_dequeue(queue);
-    var cur_y = ds_queue_dequeue(queue);
+    cur_x = ds_queue_dequeue(queue);
+    cur_y = ds_queue_dequeue(queue);
     
-    if (cur_x == target_x && cur_y == target_y) {
+    if (grid[# cur_x, cur_y] == 2) {
         found = true;
         break;
     }
     
     for (var dir = 0; dir < 4; dir++) {
-        var next_x = cur_x + ((dir == 0) - (dir == 2));
-        var next_y = cur_y + ((dir == 3) - (dir == 1));
+        var next_x = cur_x + ((dir == 2) - (dir == 3));
+        var next_y = cur_y + ((dir == 1) - (dir == 0));
 
-        if (next_x >= 0 && next_x < width && next_y >= 0 && next_y < height && parent_x[# next_x, next_y] == undefined && grid[# next_x, next_y] != 1) {
+        if (next_x >= 0 && next_x < width && next_y >= 0 && next_y < height && parent_x[# next_x, next_y] == undefined && grid[# next_x, next_y] != 1 && grid[# next_x, next_y] != 3) {
             ds_queue_enqueue(queue, next_x);
             ds_queue_enqueue(queue, next_y);
             parent_x[# next_x, next_y] = cur_x;
@@ -51,9 +40,6 @@ while (!found && !ds_queue_empty(queue)) {
 
 var path = ds_list_create();
 if (found) {
-    var cur_x = target_x;
-    var cur_y = target_y;
-
     while (cur_x != -1 && cur_y != -1) {
         ds_list_add(path, cur_x);
         ds_list_add(path, cur_y);

@@ -10,6 +10,7 @@
     <sprite>sprites\spr_dot</sprite>
     <sprite>sprites\spr_pacman</sprite>
     <sprite>sprites\spr_ghost</sprite>
+    <sprite>sprites\spr_big_dot</sprite>
   </sprites>
   <backgrounds name="background"/>
   <paths name="paths"/>
@@ -22,6 +23,14 @@
     <script>scripts\ds_grid_create_undefined.gml</script>
     <script>scripts\get_path.gml</script>
     <script>scripts\get_blinky.gml</script>
+    <script>scripts\find_nearest_dot.gml</script>
+    <script>scripts\paths_intersect.gml</script>
+    <script>scripts\ghosts_nearby_count.gml</script>
+    <script>scripts\find_direction.gml</script>
+    <script>scripts\point_in_path.gml</script>
+    <script>scripts\get_swap_ghost.gml</script>
+    <script>scripts\find_nearest_big_dot.gml</script>
+    <script>scripts\avoid_frenzy.gml</script>
   </scripts>
   <objects name="objects">
     <object>objects\obj_wall</object>
@@ -32,6 +41,8 @@
     <object>objects\ghost_spawn</object>
     <object>objects\obj_ghost</object>
     <object>objects\obj_dot</object>
+    <object>objects\ghost_spawn_barrier</object>
+    <object>objects\obj_big_dot</object>
   </objects>
   <rooms name="rooms">
     <room>rooms\main</room>

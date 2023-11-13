@@ -39,13 +39,52 @@ for (var i = 0; i &lt; instance_number(obj_wall); i++) {
     var wall = instance_find(obj_wall, i);
     global.grid[# to_grid(wall.x), to_grid(wall.y)] = 1;
 }
+for (var i = 0; i &lt; instance_number(obj_dot); i++) {
+    var dot = instance_find(obj_dot, i);
+    global.grid[# to_grid(dot.x), to_grid(dot.y)] = 2;
+}
+for (var i = 0; i &lt; instance_number(obj_big_dot); i++) {
+    var big_dot = instance_find(obj_big_dot, i);
+    global.grid[# to_grid(big_dot.x), to_grid(big_dot.y)] = 3;
+}
 
 ghost_count = 0;
 ghost_limit = 4;
-ghost_spawn_time = 60;
-alarm[0] = 1;
+ghost_spawn_time = 90;
+alarm[0] = ghost_spawn_time;
+
+revive_queue = ds_queue_create();
 
 //path = shortest_path(to_grid(start.x), to_grid(start.y), to_grid(finish.x), to_grid(finish.y));
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event eventtype="2" enumb="1">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>var ghost_id = ds_queue_dequeue(revive_queue);
+var ghost = ghosts[ghost_id];
+instance_activate_object(ghost);
+ghost.x = ghost_spawn.x;
+ghost.y = ghost_spawn.y;
+
+if (!ds_queue_empty(revive_queue)) alarm[1] = ghost_spawn_time;
 </string>
           </argument>
         </arguments>
@@ -70,10 +109,9 @@ alarm[0] = 1;
             <kind>1</kind>
             <string>ghosts[ghost_count] = instance_create(ghost_spawn.x, ghost_spawn.y, obj_ghost);
 ghosts[ghost_count].ghost_id = ghost_count;
-ghosts[ghost_count].image_index = ghost_count;
 ghost_count++;
 
-if (ghost_count &lt; ghost_limit) alarm[0] = ghost_spawn_time;
+if (ghost_count &lt; ghost_limit-1) alarm[0] = ghost_spawn_time;
 </string>
           </argument>
         </arguments>
@@ -96,7 +134,15 @@ if (ghost_count &lt; ghost_limit) alarm[0] = ghost_spawn_time;
         <arguments>
           <argument>
             <kind>1</kind>
-            <string></string>
+            <string>/*swap_x = keyboard_check_pressed(vk_right) - keyboard_check_pressed(vk_left);
+swap_y = keyboard_check_pressed(vk_up) - keyboard_check_pressed(vk_down);
+if (abs(swap_x) || abs(swap_y)) {
+    var blinky = get_blinky();
+    var swap_ghost = get_swap_ghost(blinky.x, blinky.y, swap_x, swap_y);
+    blinky.ghost_id = swap_ghost.ghost_id;
+    swap_ghost.ghost_id = 0;
+}*/
+</string>
           </argument>
         </arguments>
       </action>
@@ -128,6 +174,15 @@ for (var j = 0; j &lt; ghost_count; j++) {
         next_y = from_grid(ghosts[j].path[| i+3])+offset;
         draw_line(cur_x, cur_y, next_x, next_y);
     }
+}
+draw_set_color(c_green);
+for (i = 0; i &lt; ds_list_size(obj_pacman.path)-2; i += 2) {
+    offset = global.cell_size/2;
+    cur_x = from_grid(obj_pacman.path[| i])+offset;
+    cur_y = from_grid(obj_pacman.path[| i+1])+offset;
+    next_x = from_grid(obj_pacman.path[| i+2])+offset;
+    next_y = from_grid(obj_pacman.path[| i+3])+offset;
+    draw_line(cur_x, cur_y, next_x, next_y);
 }
 /*for (var xx = 0; xx &lt; width; xx++) {
     for (var yy = 0; yy &lt; height; yy++) {

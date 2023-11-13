@@ -34,6 +34,10 @@ targeting = false;
 dir_x = 0;
 dir_y = 0;
 point_threshold = 2;
+global.ghost_speed_modifier = 0.9;
+ghost_speed_modifier = global.ghost_speed_modifier;
+
+barrier_crossed = false;
 </string>
           </argument>
         </arguments>
@@ -81,22 +85,108 @@ point_threshold = 2;
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>if (!targeting) {
-    get_path();
-    n = ds_list_size(path);
-    if (n &gt; 2) {
-        target_x = from_grid(path[| n-1-3]);
-        target_y = from_grid(path[| n-1-2]);
-        dir_x = sign(path[| n-1-3]-path[| n-1-1]);
-        dir_y = sign(path[| n-1-2]-path[| n-1-0]);
-        targeting = true;
+            <string>if (obj_pacman.frenzy) {
+    ghost_speed_modifier = 0.5;
+}
+else {
+    ghost_speed_modifier = 0.9;
+}
+
+image_index = ghost_id;
+if (ghost_id == 0) {
+    target_dir_x = keyboard_check(ord('D')) - keyboard_check(ord('A'));
+    target_dir_y = keyboard_check(ord('S')) - keyboard_check(ord('W'));
+    
+    if (abs(target_dir_x) &amp;&amp; !place_meeting(x+target_dir_x*global.cell_size, y, obj_wall)) {
+        dir_x = target_dir_x;
+        dir_y = 0;
+        target_dir_x = 0;
+    }
+    if (abs(target_dir_y) &amp;&amp; !place_meeting(x, y+target_dir_y*global.cell_size, obj_wall)) {
+        dir_y = target_dir_y;
+        dir_x = 0;
+        target_dir_y = 0;
+    }
+    
+    spd_x = dir_x * global.move_speed * ghost_speed_modifier;
+    spd_y = dir_y * global.move_speed * ghost_speed_modifier;
+    
+    
+    if (place_meeting(x+spd_x, y, obj_wall)) {
+        while (!place_meeting(x+dir_x, y, obj_wall)) {
+            x += dir_x;
+        }
+        dir_x = 0;
+        spd_x = 0;
+    }
+    if (place_meeting(x, y+spd_y, obj_wall)) {
+        while (!place_meeting(x, y+dir_y, obj_wall)) {
+            y += dir_y;
+        }
+        dir_y = 0;
+        spd_y = 0;
+    }
+    
+    if (!barrier_crossed) {
+        spd_x = 0;
+        spd_y = -global.move_speed * ghost_speed_modifier;
+    }
+    
+    x += spd_x;
+    y += spd_y;
+}
+else {
+    if (!targeting) {
+        if (obj_pacman.frenzy) {
+            avoid_frenzy(to_grid(x), to_grid(y), obj_pacman.frenzy_path);
+            targeting = true;
+        }
+        else {
+            get_path();
+            n = ds_list_size(path);
+            if (n &gt; 2) {
+                target_x = from_grid(path[| n-1-3]);
+                target_y = from_grid(path[| n-1-2]);
+                dir_x = sign(path[| n-1-3]-path[| n-1-1]);
+                dir_y = sign(path[| n-1-2]-path[| n-1-0]);
+                targeting = true;
+            }
+        }
+    }
+    else if (abs(target_x - x) &lt;= point_threshold &amp;&amp; abs(target_y - y) &lt;= point_threshold) {
+        targeting = false;
+    }
+    else {
+        x += dir_x * global.move_speed * ghost_speed_modifier;
+        y += dir_y * global.move_speed * ghost_speed_modifier;
     }
 }
-if (abs(target_x - x) &lt;= point_threshold &amp;&amp; abs(target_y - y) &lt;= point_threshold) {
-    targeting = false;
-}
-x += dir_x * global.move_speed;
-y += dir_y * global.move_speed;
+
+if (y &lt; ghost_spawn_barrier.y - global.cell_size) barrier_crossed = true;
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event eventtype="8" enumb="0">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>draw_self();
+//draw_text(x, y, string(ghost_id))
 </string>
           </argument>
         </arguments>
